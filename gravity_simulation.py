@@ -27,7 +27,8 @@ def calculate_forces(pos_a, pos_b, m_a, m_b):
 
 
 gravitational_constant = 6.67408e-11
-G = gravitational_constant * 100000000  # So that the bodies move even with less amount of weight
+G = gravitational_constant * 100000000  # Otherwise the bodies would not move given the small value of gravitational
+# constant
 NUM_OF_BODIES = 10
 WIDTH = 1280
 HEIGHT = 720
