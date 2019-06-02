@@ -41,9 +41,6 @@ black = 0, 0, 0
 
 screen = pygame.display.set_mode(size)
 
-ball = pygame.image.load("intro_ball.gif")
-ballrect = ball.get_rect()
-
 white = (255, 255, 255)
 
 font = pygame.font.SysFont('Arial', 16)
