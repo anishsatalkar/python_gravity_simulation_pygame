@@ -1,11 +1,10 @@
 # Very simple implementation of simulation of gravity on bodies in 2D. Does not handle the case when 2 or more
 # bodies collide with each other
-
+import random
 import math
-import sys, pygame
-from scipy.constants import gravitational_constant
+import sys
+import pygame
 
-G = gravitational_constant * 100000000
 
 class Body:
     def __init__(self, pos, a, v, m):
@@ -27,29 +26,35 @@ def calculate_forces(pos_a, pos_b, m_a, m_b):
     return fx, fy
 
 
-b1 = Body([500, 500], [0, 0], [0, 0], 20)
-b2 = Body([100, 200], [0, 0], [0, 0], 2.4)
-b3 = Body([250, 478], [0, 0], [0, 0], 7)
-b4 = Body([50, 500], [0, 0], [0, 0], 1)
+gravitational_constant = 6.67408e-11
+G = gravitational_constant * 100000000  # So that the bodies move even with less amount of weight
+NUM_OF_BODIES = 10
+WIDTH = 1280
+HEIGHT = 720
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+BLUE = (109, 196, 255)
 
-bodies = [b1, b2, b3, b4]
+bodies = []
+for i in range(NUM_OF_BODIES):
+    px = random.randint(10, WIDTH - 10)
+    py = random.randint(10, HEIGHT - 10)
+    m = random.randint(1, 25)
+    bodies.append(Body([px, py], [0, 0], [0, 0], m))
 
 pygame.init()
 
-size = width, height = 800, 700
-black = 0, 0, 0
+size = WIDTH, HEIGHT
 
 screen = pygame.display.set_mode(size)
 
-white = (255, 255, 255)
-
 font = pygame.font.SysFont('Arial', 16)
 
-text = font.render('0', True, white)
+text = font.render('0', True, BLUE)
 textRect = text.get_rect()
 
 while 1:
-    screen.fill(black)
+    screen.fill(BLACK)
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
@@ -77,14 +82,13 @@ while 1:
         pos_a[0] = pos_a[0] + body_a.v[0]
         pos_a[1] = pos_a[1] + body_a.v[1]
 
-        text_str = 'm=' + str(m_a)
-
-        # Use this text_str to display the x and y components of forces acting on that body
-        # text_str = 'm=' + str(m_a) + ' , f=' + str(fx_total.__round__(3)) + ' , ' + str(fy_total.__round__(3))
+        mass_text = 'm={0}'.format(m_a)
+        force_text = 'f=({0},{1})'.format(fx_total.__round__(3), fy_total.__round__(3))
+        text_str = mass_text + ' | ' + force_text
 
         body_a_size = body_a.size
 
-        text = font.render(text_str, True, white)
+        text = font.render(text_str, True, BLUE)
         textRect.center = (
             pos_a[0] + body_a_size[0] + 10, pos_a[1] + body_a_size[1] + 10)
 
