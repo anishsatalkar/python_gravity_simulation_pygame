@@ -26,12 +26,10 @@ def calculate_forces(pos_a, pos_b, m_a, m_b):
     return fx, fy
 
 
-gravitational_constant = 6.67408e-11
-G = gravitational_constant * 100000000  # Otherwise the bodies would not move given the small value of gravitational
-# constant
-NUM_OF_BODIES = 10
-WIDTH = 1280
-HEIGHT = 720
+G = 6.67408e-11 * 100_000_000  # Otherwise the bodies would not move given the small value of gravitational constant
+NUM_OF_BODIES = 16
+WIDTH = 1080
+HEIGHT = 1920
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (109, 196, 255)
@@ -44,17 +42,13 @@ for i in range(NUM_OF_BODIES):
     bodies.append(Body([px, py], [0, 0], [0, 0], m))
 
 pygame.init()
-
 size = WIDTH, HEIGHT
-
 screen = pygame.display.set_mode(size)
 
 font = pygame.font.SysFont('Arial', 16)
-
 text = font.render('0', True, BLUE)
 textRect = text.get_rect()
-
-while 1:
+while True:
     screen.fill(BLACK)
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
@@ -83,9 +77,11 @@ while 1:
         pos_a[0] = pos_a[0] + body_a.v[0]
         pos_a[1] = pos_a[1] + body_a.v[1]
 
-        mass_text = 'm={0}'.format(m_a)
-        force_text = 'f=({0},{1})'.format(fx_total.__round__(3), fy_total.__round__(3))
-        text_str = mass_text + ' | ' + force_text
+        mass_text = 'M={0}'.format(m_a)
+        # force_text = 'F=({0},{1})'.format(fx_total.__round__(3), fy_total.__round__(3))
+        # velocity_text = 'V=({},{})'.format(body_a.v[0].__round__(3),body_a.v[1].__round__(3))
+        # text_str = mass_text + '   ' + force_text + '   ' + velocity_text
+        text_str = mass_text
 
         body_a_size = body_a.size
 
@@ -95,6 +91,5 @@ while 1:
 
         screen.blit(text, textRect)
 
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(pos_a[0], pos_a[1], body_a.size[0], body_a.size[1]))
-
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(pos_a[0], pos_a[1], body_a_size[0], body_a_size[1]))
     pygame.display.flip()
