@@ -5,14 +5,12 @@ import math
 import sys
 import pygame
 
-
 class Body:
     def __init__(self, pos, a, v, m):
         self.pos = pos  # pos is a list of x and y position of that body in pixels eg : [500,600]
         self.a = a  # a is a list of x and y components of accelaration of that body in pixel units
         self.v = v  # b is a list of x and y components of velocity of that body in pixel units
         self.m = m  # m is the mass of that object
-        self.size = [m, m]  # size is used for only visualisation of the body
 
 
 def calculate_forces(pos_a, pos_b, m_a, m_b):
@@ -42,6 +40,14 @@ for i in range(NUM_OF_BODIES):
     py = random.randint(10, HEIGHT - 10)
     m = random.randint(1, 25)
     bodies.append(Body([px, py], [0, 0], [0, 0], m))
+
+# Some predefined bodies for the purpose of testing
+# bodies.append(Body([500,500],[0,0],[0,0],20))
+# bodies.append(Body([510,503],[0,0],[0,0],7))
+# bodies.append(Body([400,400],[0,0],[0,0],14))
+# bodies.append(Body([10,600],[0,0],[0,0],9))
+# bodies.append(Body([250,198],[0,0],[0,0],18))
+# bodies.append(Body([340,700],[0,0],[0,0],24))
 
 pygame.init()
 size = WIDTH, HEIGHT
@@ -85,13 +91,10 @@ while True:
         # text_str = mass_text + '   ' + force_text + '   ' + velocity_text
         text_str = mass_text
 
-        body_a_size = body_a.size
-
         text = font.render(text_str, True, BLUE)
-        textRect.center = (
-            pos_a[0] + body_a_size[0] + 10, pos_a[1] + body_a_size[1] + 10)
+        textRect.center = (pos_a[0] + m_a + 10, pos_a[1] + m_a + 10)
 
         screen.blit(text, textRect)
 
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(pos_a[0], pos_a[1], body_a_size[0], body_a_size[1]))
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(pos_a[0], pos_a[1], m_a, m_a))
     pygame.display.flip()
