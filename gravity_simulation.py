@@ -18,18 +18,20 @@ class Body:
 def calculate_forces(pos_a, pos_b, m_a, m_b):
     x_diff = pos_b[0] - pos_a[0]
     y_diff = pos_b[1] - pos_a[1]
-    f = G * m_a * m_b / math.sqrt((x_diff) ** 2 + (y_diff) ** 2)
-    angle = math.atan2(y_diff, x_diff)
-    fx = f * math.cos(angle)
-    fy = f * math.sin(angle)
+    hypotenuse = math.sqrt(((x_diff) ** 2 + (y_diff) ** 2))
+    sin = x_diff / hypotenuse
+    cos = y_diff / hypotenuse
+    f = G * m_a * m_b / hypotenuse ** 2
+    fx = f * sin
+    fy = f * cos
 
     return fx, fy
 
 
 G = 6.67408e-11 * 100_000_000  # Otherwise the bodies would not move given the small value of gravitational constant
-NUM_OF_BODIES = 16
-WIDTH = 1080
-HEIGHT = 1920
+NUM_OF_BODIES = 10
+WIDTH = 900
+HEIGHT = 800
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (109, 196, 255)
