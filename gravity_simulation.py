@@ -58,7 +58,7 @@ while True:
 
     sin = x_diff / hypotenuse
     cos = y_diff / hypotenuse
-    f = G * m[np.newaxis, :] * m[:, np.newaxis] / hypotenuse ** 2
+    f = -G * m[np.newaxis, :] * m[:, np.newaxis] / hypotenuse ** 2
     fx = f * sin
     fy = f * cos
 
