@@ -1,12 +1,12 @@
 import sys
+import time
 
 import numpy as np
-import numpy.ma as ma
 import pygame
 
 G = 6.67408e-11 * 100_000_000  # Otherwise the bodies would not move given the small value of gravitational constant
-NUM_OF_BODIES = 16
-WIDTH = 900
+NUM_OF_BODIES = 4000
+WIDTH = 1200
 HEIGHT = 800
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -36,9 +36,10 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
+    in_t = time.time()
     for i in range(0,NUM_OF_BODIES):
-        xdiff = ma.masked_values(px - px[i],0)
-        ydiff = ma.masked_values(py - py[i],0)
+        xdiff = (px - px[i])
+        ydiff = (py - py[i])
 
 
         distance = np.sqrt(xdiff ** 2 + ydiff ** 2)
@@ -49,8 +50,8 @@ while True:
         sin = np.divide(ydiff,distance)
         cos = np.divide(xdiff,distance)
 
-        fx_total = np.sum(np.multiply(f, cos))
-        fy_total = np.sum(np.multiply(f,sin))
+        fx_total = np.nansum(np.multiply(f, cos))
+        fy_total = np.nansum(np.multiply(f,sin))
 
         vx[i] = vx[i] + fx_total / m[i]
         vy[i] = vy[i] + fy_total / m[i]
@@ -60,4 +61,5 @@ while True:
 
 
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(px[i], py[i], m[i],m[i]))
+    print(time.time() - in_t)
     pygame.display.flip()
