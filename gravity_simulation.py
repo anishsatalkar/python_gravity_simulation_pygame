@@ -1,6 +1,8 @@
 # Very simple implementation of simulation of gravity on bodies in 2D. Does not handle the case when 2 or more
 # bodies collide with each other
 import random
+import time
+
 import math
 import sys
 import pygame
@@ -27,7 +29,7 @@ def calculate_forces(pos_a, pos_b, m_a, m_b):
 
 
 G = 6.67408e-11 * 100_000_000  # Otherwise the bodies would not move given the small value of gravitational constant
-NUM_OF_BODIES = 10
+NUM_OF_BODIES = 100
 WIDTH = 900
 HEIGHT = 800
 WHITE = (255, 255, 255)
@@ -57,9 +59,11 @@ font = pygame.font.SysFont('Arial', 16)
 text = font.render('0', True, BLUE)
 textRect = text.get_rect()
 while True:
+    in_t = time.time()
     screen.fill(BLACK)
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
+
 
     for body_a in bodies:
         pos_a = body_a.pos
@@ -96,5 +100,8 @@ while True:
 
         screen.blit(text, textRect)
 
+
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(pos_a[0], pos_a[1], m_a, m_a))
+
     pygame.display.flip()
+    print(time.time() - in_t)
