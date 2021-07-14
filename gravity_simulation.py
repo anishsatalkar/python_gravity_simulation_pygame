@@ -7,6 +7,7 @@ import math
 import sys
 import pygame
 
+
 class Body:
     def __init__(self, pos, a, v, m):
         self.pos = pos  # pos is a list of x and y position of that body in pixels eg : [500,600]
@@ -64,7 +65,6 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
-
     for body_a in bodies:
         pos_a = body_a.pos
         m_a = body_a.m
@@ -99,7 +99,6 @@ while True:
         textRect.center = (pos_a[0] + m_a + 10, pos_a[1] + m_a + 10)
 
         screen.blit(text, textRect)
-
 
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(pos_a[0], pos_a[1], m_a, m_a))
 
