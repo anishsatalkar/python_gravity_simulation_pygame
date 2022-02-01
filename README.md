@@ -16,3 +16,7 @@ You can run `pip3 install requirements.txt` to install the dependencies for pyth
 ## Additional Info
 You may comment out the part of code which prints the text (mass of each object over it) to 
 make the simulation cleaner.
+
+## This is how it looks with 700 particles.
+
+![Simulation](res/n-body-gif.gif)
