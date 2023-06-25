@@ -29,8 +29,8 @@ BLUE = (109, 196, 255)
 vx = np.zeros((NUM_OF_BODIES,), dtype=float)
 vy = np.zeros((NUM_OF_BODIES,), dtype=float)
 
-px = np.random.uniform(low=10, high=WIDTH - 10, size=NUM_OF_BODIES)
-py = np.random.uniform(low=10, high=HEIGHT - 10, size=NUM_OF_BODIES)
+px = np.random.uniform(low=20, high=WIDTH - 20, size=NUM_OF_BODIES)
+py = np.random.uniform(low=20, high=HEIGHT - 20, size=NUM_OF_BODIES)
 
 m = np.random.randint(13, 15, size=NUM_OF_BODIES)
 
@@ -52,7 +52,7 @@ font = pygame.font.SysFont('Arial', 12)
 text = font.render('0', True, BLUE)
 textRect = text.get_rect()
 crash_sound = pygame.mixer.Sound("audio/collision_00_comp.mp3")
-rgb = (255, 255, 255)
+rgb = [''] * NUM_OF_BODIES
 while True:
     screen.fill(BLACK)
     for event in pygame.event.get():
@@ -120,6 +120,8 @@ while True:
         # render_object_display_text(m[i], fx_total, fy_total, vx[i], vy[i], px[i], py[i])
 
         # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(px[i], py[i], m[i], m[i]))
+        f_sum = abs(fx_total) + abs(fy_total)
+        rgb[i] = (min(128 + (f_sum * 1000), 255), min(128 + (f_sum * 5000), 255), max(255 - (f_sum * 2000), 0))
     # Update px, py, vx, vy
     px = t_px.copy()
     py = t_py.copy()
@@ -129,7 +131,7 @@ while True:
     for i in range(NUM_OF_BODIES):
         rects[i].left = px[i]
         rects[i].top = py[i]
-        pygame.draw.rect(screen, rgb, rects[i])
+        pygame.draw.rect(screen, rgb[i], rects[i])
 
     # print(time.time() - in_t)
     pygame.display.flip()
