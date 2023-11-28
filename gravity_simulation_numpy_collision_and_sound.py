@@ -4,134 +4,168 @@ import time
 import numpy as np
 import pygame
 
-
-def render_object_display_text(object_mass, fx_total, fy_total,
-                               object_vx, object_vy, object_px, object_py):
-    mass_text = f'M={object_mass}'
-    force_text = f'F=({fx_total.__round__(2)},{fy_total.__round__(2)})'
-    velocity_text = f'V=({object_vx.__round__(2)},{object_vy.__round__(2)})'
-    text_str = f'{mass_text}  {force_text}  {velocity_text}'
-
-    text = font.render(text_str, True, BLUE)
-    textRect.center = (object_px + object_mass + 10, object_py + object_mass + 10)
-
-    screen.blit(text, textRect)
+from world import World
 
 
-G = 6.67408e-11 * 100_000_000  # Otherwise the bodies would not move given the small value of gravitational constant
-NUM_OF_BODIES = 5
-WIDTH = 800
-HEIGHT = 640
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-BLUE = (109, 196, 255)
+class NBodySimulator:
+    # Gravitational constant. Multiplied by 100M so that the bodies can move given the small value of
+    # gravitational constant
+    G = 6.67408e-11 * 100_000_000
 
-vx = np.zeros((NUM_OF_BODIES,), dtype=float)
-vy = np.zeros((NUM_OF_BODIES,), dtype=float)
+    # Width of the window.
+    WIDTH = 800
 
-px = np.random.uniform(low=20, high=WIDTH - 20, size=NUM_OF_BODIES)
-py = np.random.uniform(low=20, high=HEIGHT - 20, size=NUM_OF_BODIES)
+    # Height of the window.
+    HEIGHT = 640
 
-m = np.random.randint(13, 15, size=NUM_OF_BODIES)
+    # RGB for white.
+    WHITE = (255, 255, 255)
 
-rects = [pygame.Rect(px[i], py[i], m[i], m[i]) for i in range(NUM_OF_BODIES)]
+    # RGB for black.
+    BLACK = (0, 0, 0)
 
-fx = np.zeros((NUM_OF_BODIES,), dtype=float)
-fy = np.zeros((NUM_OF_BODIES,), dtype=float)
+    # RGB for a color that looks like blue.
+    BLUE = (109, 196, 255)
 
-t_vx = vx.copy()
-t_vy = vy.copy()
-t_px = px.copy()
-t_py = py.copy()
+    def __init__(self, world=None):
+        pygame.init()
+        if not world:
+            self.world = World(NBodySimulator.HEIGHT, NBodySimulator.WIDTH)
+        else:
+            self.world = world
+        self.font = pygame.font.SysFont('Arial', 12)
+        self.screen = None
 
-pygame.init()
-size = WIDTH, HEIGHT
-screen = pygame.display.set_mode(size)
+    def _render_object_display_text(self, object_mass, fx_total, fy_total,
+                                    object_vx, object_vy, object_px, object_py):
+        mass_text = f'M={object_mass}'
+        force_text = f'F=({fx_total.__round__(2)},{fy_total.__round__(2)})'
+        velocity_text = f'V=({object_vx.__round__(2)},{object_vy.__round__(2)})'
+        text_str = f'{mass_text}  {force_text}  {velocity_text}'
 
-font = pygame.font.SysFont('Arial', 12)
-text = font.render('0', True, BLUE)
-textRect = text.get_rect()
-crash_sound = pygame.mixer.Sound("audio/collision_00_comp.mp3")
-rgb = [''] * NUM_OF_BODIES
-while True:
-    screen.fill(BLACK)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
+        text = self.font.render(text_str, True, NBodySimulator.BLUE)
+        text_rect = text.get_rect()
+        text_rect.center = (object_px + object_mass + 10, object_py + object_mass + 10)
+        self.screen.blit(text, text_rect)
 
-    in_t = time.time()
-    for i in range(0, NUM_OF_BODIES):
-        xdiff = (px - px[i])
-        ydiff = (py - py[i])
+    def run_simulation(self):
+        """
+        This function runs the simulation loop.
 
-        indices = rects[i].collidelistall(rects)
-        indices.remove(i)
-        c_vx = 0
-        c_vy = 0
+        Since there is a costly loop involved, I've refrained from making function calls inside that loop
+        to keep the simulation as highly performant as possible and that is one reason why this function is so
+        long and ugly.
+        :return:
+        """
+        t_vx = self.world.vx.copy()
+        t_vy = self.world.vy.copy()
+        t_px = self.world.px.copy()
+        t_py = self.world.py.copy()
 
-        for two in indices:
-            pygame.mixer.Channel(0).play(crash_sound)
-            mass_sum = m[i] + m[two]
-            mass_diff = m[i] - m[two]
-            twice_mass_two = 2 * m[two]
-            c_vx += ((mass_diff / mass_sum) * vx[i]) + ((twice_mass_two / mass_sum) * vx[two])
-            c_vy += ((mass_diff / mass_sum) * vy[i]) + ((twice_mass_two / mass_sum) * vy[two])
+        pygame.init()
+        size = NBodySimulator.WIDTH, NBodySimulator.HEIGHT
+        self.screen = pygame.display.set_mode(size)
 
-        distance = np.sqrt(xdiff ** 2 + ydiff ** 2)
+        crash_sound = pygame.mixer.Sound("audio/collision_00_comp.mp3")
+        rgb = [''] * self.world.num_of_bodies
 
-        f = G * m[i] * np.divide(m, distance)
+        while True:
+            self.screen.fill(NBodySimulator.BLACK)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
 
-        sin = np.divide(ydiff, distance)
-        cos = np.divide(xdiff, distance)
+            in_t = time.time()
+            for i in range(0, self.world.num_of_bodies):
+                xdiff = (self.world.px - self.world.px[i])
+                ydiff = (self.world.py - self.world.py[i])
 
-        fx_total = np.nansum(np.multiply(f, cos))
-        fy_total = np.nansum(np.multiply(f, sin))
+                indices = self.world.rects[i].collidelistall(self.world.rects)
+                indices.remove(i)
+                c_vx = 0
+                c_vy = 0
 
-        # If collision does not occur, calculate the for
-        if not c_vx:
-            c_vx = c_vx + vx[i] + fx_total / m[i]
-        if not c_vy:
-            c_vy = c_vy + vy[i] + fy_total / m[i]
+                for two in indices:
+                    pygame.mixer.Channel(0).play(crash_sound)
+                    mass_sum = self.world.m[i] + self.world.m[two]
+                    mass_diff = self.world.m[i] - self.world.m[two]
+                    twice_mass_two = 2 * self.world.m[two]
+                    c_vx += ((mass_diff / mass_sum) * self.world.vx[i]) + \
+                            ((twice_mass_two / mass_sum) * self.world.vx[two])
+                    c_vy += ((mass_diff / mass_sum) * self.world.vy[i]) + \
+                            ((twice_mass_two / mass_sum) * self.world.vy[two])
 
-        if t_px[i] - m[i] < 0 or t_px[i] + m[i] > WIDTH:
-            c_vx = -c_vx
-            pygame.mixer.Channel(1).play(crash_sound)
+                distance = np.sqrt(xdiff ** 2 + ydiff ** 2)
 
-        if t_py[i] - m[i] < 0 or t_py[i] + m[i] > HEIGHT:
-            c_vy = -c_vy
-            pygame.mixer.Channel(1).play(crash_sound)
+                f = NBodySimulator.G * self.world.m[i] * np.divide(self.world.m, distance)
 
-        # Limit the velocities to avoid erratic behavior
-        # if c_vx > 3.0:
-        #     c_vx = 3.0
-        # if c_vx < -3.0:
-        #     c_vx = -3.0
-        # if c_vy > 3.0:
-        #     c_vy = 3.0
-        # if c_vy < -3.0:
-        #     c_vy = -3.0
+                sin = np.divide(ydiff, distance)
+                cos = np.divide(xdiff, distance)
 
-        t_px[i] = px[i] + c_vx
-        t_py[i] = py[i] + c_vy
+                fx_total = np.nansum(np.multiply(f, cos))
+                fy_total = np.nansum(np.multiply(f, sin))
 
-        t_vx[i] = c_vx
-        t_vy[i] = c_vy
+                # If collision does not occur, calculate the for
+                if not c_vx:
+                    c_vx = c_vx + self.world.vx[i] + fx_total / self.world.m[i]
+                if not c_vy:
+                    c_vy = c_vy + self.world.vy[i] + fy_total / self.world.m[i]
 
-        # Comment this method call to remove the text information over objects
-        # render_object_display_text(m[i], fx_total, fy_total, vx[i], vy[i], px[i], py[i])
+                if t_px[i] - self.world.m[i] < 0 or t_px[i] + self.world.m[i] > NBodySimulator.WIDTH:
+                    c_vx = -c_vx
+                    pygame.mixer.Channel(1).play(crash_sound)
 
-        # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(px[i], py[i], m[i], m[i]))
-        f_sum = abs(fx_total) + abs(fy_total)
-        rgb[i] = (min(128 + (f_sum * 1000), 255), min(128 + (f_sum * 5000), 255), max(255 - (f_sum * 2000), 0))
-    # Update px, py, vx, vy
-    px = t_px.copy()
-    py = t_py.copy()
-    vx = t_vx.copy()
-    vy = t_vy.copy()
+                if t_py[i] - self.world.m[i] < 0 or t_py[i] + self.world.m[i] > NBodySimulator.HEIGHT:
+                    c_vy = -c_vy
+                    pygame.mixer.Channel(1).play(crash_sound)
 
-    for i in range(NUM_OF_BODIES):
-        rects[i].left = px[i]
-        rects[i].top = py[i]
-        pygame.draw.rect(screen, rgb[i], rects[i])
+                # Limit the velocities to avoid erratic behavior
+                # if c_vx > 3.0:
+                #     c_vx = 3.0
+                # if c_vx < -3.0:
+                #     c_vx = -3.0
+                # if c_vy > 3.0:
+                #     c_vy = 3.0
+                # if c_vy < -3.0:
+                #     c_vy = -3.0
 
-    # print(time.time() - in_t)
-    pygame.display.flip()
+                t_px[i] = self.world.px[i] + c_vx
+                t_py[i] = self.world.py[i] + c_vy
+
+                t_vx[i] = c_vx
+                t_vy[i] = c_vy
+
+                # Comment this method call to remove the text information over objects
+                # render_object_display_text(m[i], fx_total, fy_total, vx[i], vy[i], px[i], py[i])
+
+                # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(px[i], py[i], m[i], m[i]))
+                f_sum = abs(fx_total) + abs(fy_total)
+                rgb[i] = (min(128 + (f_sum * 1000), 255), min(128 + (f_sum * 5000), 255), max(255 - (f_sum * 2000), 0))
+            # Update px, py, vx, vy
+            self.world.px = t_px.copy()
+            self.world.py = t_py.copy()
+            self.world.vx = t_vx.copy()
+            self.world.vy = t_vy.copy()
+
+            for i in range(self.world.num_of_bodies):
+                self.world.rects[i].left = self.world.px[i]
+                self.world.rects[i].top = self.world.py[i]
+                pygame.draw.rect(self.screen, rgb[i], self.world.rects[i])
+
+            # print(time.time() - in_t)
+            pygame.display.flip()
+
+# # vx = np.zeros((NUM_OF_BODIES,), dtype=float)
+# # vx = np.random.uniform(low=-0.5, high=0.5, size=NUM_OF_BODIES)
+# vx = np.array([-0.3, 0.3])
+# # vy = np.zeros((NUM_OF_BODIES,), dtype=float)
+# # vy = np.random.uniform(low=-0.5, high=0.5, size=NUM_OF_BODIES)
+# vy = np.array([0.0, 0.0])
+#
+# # px = np.random.uniform(low=20, high=WIDTH - 20, size=NUM_OF_BODIES)
+# px = np.array([300.0, 300.0], dtype=float)
+# # py = np.random.uniform(low=20, high=HEIGHT - 20, size=NUM_OF_BODIES)
+# py = np.array([300.0, 200.0], dtype=float)
+#
+# # m = np.random.randint(13, 15, size=NUM_OF_BODIES)
+# m = np.array([13,13], dtype=int)
