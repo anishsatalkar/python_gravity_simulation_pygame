@@ -20,3 +20,9 @@ make the simulation cleaner.
 ## This is how it looks with 700 particles.
 
 ![Simulation](res/n-body-gif.gif)
+
+
+## This is with collisions, sounds and color interpolation.
+
+https://github.com/anishsatalkar/python_gravity_simulation_pygame/assets/20540458/4239eb5c-8cbc-4a08-8ea3-e9ae6f9c7f50
+
