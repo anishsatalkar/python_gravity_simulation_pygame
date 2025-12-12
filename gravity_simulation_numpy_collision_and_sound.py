@@ -27,6 +27,9 @@ class NBodySimulator:
     # RGB for a color that looks like blue.
     BLUE = (109, 196, 255)
 
+    # Velocity limit
+    V_LIMIT = 3
+
     def __init__(self, world=None):
         pygame.init()
         if not world:
@@ -120,14 +123,14 @@ class NBodySimulator:
                     pygame.mixer.Channel(1).play(crash_sound)
 
                 # Limit the velocities to avoid erratic behavior
-                # if c_vx > 3.0:
-                #     c_vx = 3.0
-                # if c_vx < -3.0:
-                #     c_vx = -3.0
-                # if c_vy > 3.0:
-                #     c_vy = 3.0
-                # if c_vy < -3.0:
-                #     c_vy = -3.0
+                if c_vx > self.V_LIMIT:
+                    c_vx = self.V_LIMIT
+                if c_vx < -self.V_LIMIT:
+                    c_vx = -self.V_LIMIT
+                if c_vy > self.V_LIMIT:
+                    c_vy = self.V_LIMIT
+                if c_vy < -self.V_LIMIT:
+                    c_vy = -self.V_LIMIT
 
                 t_px[i] = self.world.px[i] + c_vx
                 t_py[i] = self.world.py[i] + c_vy
@@ -155,17 +158,5 @@ class NBodySimulator:
             # print(time.time() - in_t)
             pygame.display.flip()
 
-# # vx = np.zeros((NUM_OF_BODIES,), dtype=float)
-# # vx = np.random.uniform(low=-0.5, high=0.5, size=NUM_OF_BODIES)
-# vx = np.array([-0.3, 0.3])
-# # vy = np.zeros((NUM_OF_BODIES,), dtype=float)
-# # vy = np.random.uniform(low=-0.5, high=0.5, size=NUM_OF_BODIES)
-# vy = np.array([0.0, 0.0])
-#
-# # px = np.random.uniform(low=20, high=WIDTH - 20, size=NUM_OF_BODIES)
-# px = np.array([300.0, 300.0], dtype=float)
-# # py = np.random.uniform(low=20, high=HEIGHT - 20, size=NUM_OF_BODIES)
-# py = np.array([300.0, 200.0], dtype=float)
-#
-# # m = np.random.randint(13, 15, size=NUM_OF_BODIES)
-# m = np.array([13,13], dtype=int)
+if __name__ == '__main__':
+    NBodySimulator(World(NBodySimulator.HEIGHT, NBodySimulator.WIDTH, 10)).run_simulation()
